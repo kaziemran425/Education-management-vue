@@ -1,6 +1,7 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="bg-grey-1">
-    <q-header elevated class="bg-white text-grey-8">
+  <q-layout view="lHh Lpr lFf">
+    <!-- Header Section -->
+    <q-header elevated class="bg-primary text-white">
       <q-toolbar>
         <q-btn
           flat
@@ -10,26 +11,29 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-
         <q-toolbar-title class="text-weight-bold">
-          School <span class="text-primary">Master</span>
+          School <span class="text-weight-light">ERP Portal</span>
         </q-toolbar-title>
 
         <q-space />
 
         <div class="q-gutter-sm row items-center no-wrap">
+          <!-- Notifications -->
           <q-btn round flat icon="notifications">
             <q-badge floating color="red" rounded />
           </q-btn>
 
+          <!-- User Profile & Logout -->
           <q-btn round flat>
             <q-avatar size="32px">
-              <img src="https://cdn.quasar.dev/img/avatar.png">
+              <img src="https://cdn.quasar.dev/img/avatar.png" />
             </q-avatar>
-            <q-menu>
+            <q-menu transition-show="jump-down" transition-hide="jump-up">
               <q-list style="min-width: 150px">
-                <q-item clickable v-close-popup @click="logout">
-                  <q-item-section avatar><q-icon name="logout" color="red" /></q-item-section>
+                <q-item clickable v-close-popup class="text-red" @click="logout">
+                  <q-item-section avatar>
+                    <q-icon name="logout" color="red" />
+                  </q-item-section>
                   <q-item-section>Logout</q-item-section>
                 </q-item>
               </q-list>
@@ -39,45 +43,72 @@
       </q-toolbar>
     </q-header>
 
+    <!-- Sidebar Navigation -->
     <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
       bordered
-      class="bg-white"
-      :width="260"
+      class="bg-grey-1"
     >
       <q-scroll-area class="fit">
         <q-list padding>
-          <q-item-label header class="text-uppercase text-weight-bold text-grey-7">
-            Main Menu
+          <q-item-label header class="text-weight-bold text-uppercase text-grey-7">
+            User Menu
           </q-item-label>
 
-          <q-item
-            v-for="link in menuLinks"
-            :key="link.title"
-            clickable
-            v-ripple
-            :to="link.to"
-            exact
-            active-class="bg-blue-1 text-primary text-weight-bold"
-            class="q-mx-sm rounded-borders q-mb-xs"
-          >
+          <!-- Dashboard Link -->
+          <q-item clickable v-ripple to="/dashboard" active-class="active-link">
             <q-item-section avatar>
-              <q-icon :name="link.icon" />
+              <q-icon name="home" />
             </q-item-section>
-            <q-item-section>
-              <q-item-label>{{ link.title }}</q-item-label>
-              <q-item-label caption v-if="link.caption">{{ link.caption }}</q-item-label>
-            </q-item-section>
+            <q-item-section>User Dashboard</q-item-section>
           </q-item>
 
+          <!-- Payment History Link -->
+          <q-item clickable v-ripple to="/payment-history" active-class="active-link">
+            <q-item-section avatar>
+              <q-icon name="history" />
+            </q-item-section>
+            <q-item-section>My Payments</q-item-section>
+          </q-item>
+
+          <!-- Subscription Plans Link -->
+          <q-item clickable v-ripple to="/subscription-plans" active-class="active-link">
+            <q-item-section avatar>
+              <q-icon name="card_membership" />
+            </q-item-section>
+            <q-item-section>Subscription Plans</q-item-section>
+          </q-item>
+
+          <!-- School List Link -->
+          <q-item clickable v-ripple to="/school-list" active-class="active-link">
+            <q-item-section avatar>
+              <q-icon name="business" />
+            </q-item-section>
+            <q-item-section>School List</q-item-section>
+          </q-item>
+
+          <q-separator class="q-my-md" />
+
+          <!-- Admin Panel Quick Link -->
+          <q-item clickable v-ripple to="/admin/dashboard" class="text-indigo-7">
+            <q-item-section avatar>
+              <q-icon name="admin_panel_settings" />
+            </q-item-section>
+            <q-item-section class="text-weight-bold">Switch to Admin</q-item-section>
+          </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>
 
+    <!-- Content Area -->
     <q-page-container>
       <router-view v-slot="{ Component }">
-        <transition appear enter-active-class="animated fadeIn">
+        <transition
+          appear
+          enter-active-class="animated fadeIn"
+          leave-active-class="animated fadeOut"
+        >
           <component :is="Component" />
         </transition>
       </router-view>
@@ -85,65 +116,30 @@
   </q-layout>
 </template>
 
-<script>
+<script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-export default {
-  name: 'MainLayout',
+const leftDrawerOpen = ref(false)
+const router = useRouter()
 
-  setup () {
-    const leftDrawerOpen = ref(false)
-    const router = useRouter()
+const toggleLeftDrawer = () => {
+  leftDrawerOpen.value = !leftDrawerOpen.value
+}
 
-    // Sajiya dewa links based on your routes
-    const menuLinks = [
-      {
-        title: 'Dashboard',
-        caption: 'Overview of system',
-        icon: 'dashboard',
-        to: '/dashboard'
-      },
-      {
-        title: 'School List',
-        caption: 'Manage all schools',
-        icon: 'domain',
-        to: '/school-list'
-      },
-      {
-        title: 'Payment History',
-        caption: 'Track transactions',
-        icon: 'history_edu',
-        to: '/payment-history'
-      },
-      {
-        title: 'Subscription Plans',
-        caption: 'Plan management',
-        icon: 'card_membership',
-        to: '/subscription-plans'
-      }
-    ]
-
-    const logout = () => {
-      // Clear session logic
-      localStorage.removeItem('user_session')
-      router.push('/auth/login')
-    }
-
-    return {
-      menuLinks,
-      leftDrawerOpen,
-      toggleLeftDrawer () {
-        leftDrawerOpen.value = !leftDrawerOpen.value
-      },
-      logout
-    }
-  }
+const logout = () => {
+  localStorage.removeItem('user_session')
+  router.push('/auth/login')
 }
 </script>
 
 <style scoped>
-.rounded-borders {
-  border-radius: 10px;
+.active-link {
+  color: #1976D2;
+  background: rgba(25, 118, 210, 0.1);
+  border-right: 4px solid #1976D2;
+}
+.text-weight-light {
+  font-weight: 300;
 }
 </style>

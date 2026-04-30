@@ -248,6 +248,18 @@
               </q-item>
             </q-list>
           </q-expansion-item>
+
+          <!-- setting -->
+          <q-expansion-item icon="settings" label="Settings" group="menu">
+            <q-list class="q-pl-md">
+              <q-item clickable v-ripple to="/admin/general-settings">
+                <q-item-section>school Profile</q-item-section>
+              </q-item>
+                <q-item clickable v-ripple to="/admin/general-settings">
+                <q-item-section></q-item-section>
+              </q-item>
+            </q-list>
+          </q-expansion-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>

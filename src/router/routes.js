@@ -1,58 +1,62 @@
 const routes = [
+  // MAIN LAYOUT (ইউজার বা জেনারেল সাইড)
   {
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
+    meta: { requiresAuth: true, role: "user" },
     children: [
-      { path: "dashboard", component: () => import("src/pages/IndexPage.vue") },
+      { path: "", redirect: "/dashboard" },
       {
-        path: "payment-history",
-        component: () => import("src/pages/paymentHistory.vue"),
+        path: "dashboard",
+        component: () => import("pages/dashbBoard.vue"), // আপনার ফাইলের নামের বানান নিশ্চিত করুন
       },
       {
-        path: "school-list",
-        component: () => import("src/pages/schoolList.vue"),
+        path: "payment-history",
+        component: () => import("pages/paymentHistory.vue"),
       },
       {
         path: "subscription-plans",
-        component: () => import("src/pages/SubscriptionPlans.vue"),
+        component: () => import("pages/SubscriptionPlans.vue"),
+      },
+      {
+        path: "school-list",
+        component: () => import("pages/schoolList.vue"),
       },
     ],
   },
 
-  // auth layout
-
+  // AUTH LAYOUT (লগইন এবং রেজিস্ট্রেশন)
   {
     path: "/auth",
-    component: () => import("src/layouts/AuthLayout.vue"),
+    component: () => import("layouts/AuthLayout.vue"), // ইমপোর্ট পাথ চেক করুন
     children: [
       {
-        path: "/registration",
-        component: () => import("src/pages/auth/regiPage.vue"),
+        path: "login",
+        component: () => import("pages/auth/loginPage.vue"),
       },
-
       {
-        path: "/login",
-        component: () => import("src/pages/auth/loginPage.vue"),
+        path: "registration",
+        component: () => import("pages/auth/regiPage.vue"),
       },
-
       {
-        path: "/forgot-password",
-        component: () => import("src/pages/auth/forgotePass.vue"),
+        path: "forgot-password",
+        component: () => import("pages/auth/forgotePass.vue"),
       },
     ],
   },
 
-  // adminLAYOUTS
-
+  // ADMIN LAYOUT (মূল স্কুল ম্যানেজমেন্ট সিস্টেম)
   {
     path: "/admin",
     component: () => import("src/layouts/AdminLayout.vue"),
     children: [
+      // ড্যাশবোর্ড
       {
         path: "dashboard",
         component: () => import("src/pages/dashBoard/DashBoard.vue"),
       },
-      // academii
+
+      // একাডেমিক মডিউল
       {
         path: "academic-year",
         component: () => import("src/pages/academic/AcademicYear.vue"),
@@ -70,24 +74,51 @@ const routes = [
         component: () => import("src/pages/academic/SubjectsPage.vue"),
       },
       {
-        path: "class-routine",
-        component: () => import("src/pages/academic/ClassRoutine.vue"),
-      },
-      {
         path: "class",
         component: () => import("src/pages/academic/ClassEs.vue"),
       },
-      // attendance
-
       {
-        path: "attendance-report",
-        component: () => import("src/pages/attendance/AttendanceReport.vue"),
+        path: "class-routine",
+        component: () => import("src/pages/academic/ClassRoutine.vue"),
       },
+
+      // স্টুডেন্ট মডিউল
+      {
+        path: "student-list",
+        component: () => import("src/pages/students/StudentList.vue"),
+      },
+      {
+        path: "student-add",
+        component: () => import("src/pages/students/StudentAdd.vue"),
+      },
+      {
+        path: "student-create",
+        component: () => import("src/pages/students/StudentCreate.vue"),
+      },
+      {
+        path: "student-details",
+        component: () => import("src/pages/students/StudentDetails.vue"),
+      },
+      {
+        path: "student-promote",
+        component: () => import("src/pages/students/StudentPromote.vue"),
+      },
+
+      // শিক্ষক মডিউল
+      {
+        path: "teacher-list",
+        component: () => import("src/pages/teacher/teacherList.vue"),
+      },
+      {
+        path: "teacher-add",
+        component: () => import("src/pages/teacher/TeacherAdd.vue"),
+      },
+
+      // উপস্থিতি মডিউল (Attendance)
       {
         path: "student-attendance",
         component: () => import("src/pages/attendance/studentAttendance.vue"),
       },
-
       {
         path: "teacher-attendance",
         component: () => import("src/pages/attendance/TeacherAttendance.vue"),
@@ -96,67 +127,12 @@ const routes = [
         path: "staff-attendance",
         component: () => import("src/pages/attendance/staffAttendance.vue"),
       },
-
-      // fees
-
       {
-        path: "fee-collection",
-        component: () => import("src/pages/fees/FeeCollection.vue"),
-      },
-      {
-        path: "fee-invoice",
-        component: () => import("src/pages/fees/FeeInvoice.vue"),
-      },
-      {
-        path: "fee-types",
-        component: () => import("src/pages/fees/FeeType.vue"),
+        path: "attendance-report",
+        component: () => import("src/pages/attendance/AttendanceReport.vue"),
       },
 
-      // inventory
-
-      {
-        path: "product-list",
-        component: () => import("src/pages/inventory/productList.vue"),
-      },
-      {
-        path: "purchase",
-        component: () => import("src/pages/inventory/purcHase.vue"),
-      },
-      {
-        path: "stock-report",
-        component: () => import("src/pages/inventory/StockReport.vue"),
-      },
-      {
-        path: "supplier-list",
-        component: () => import("src/pages/inventory/SupplierList.vue"),
-      },
-      // notice
-
-      {
-        path: "notice-list",
-        component: () => import("src/pages/notice/noticeList.vue"),
-      },
-      // certificates
-
-      {
-        path: "generate-certificate",
-        component: () =>
-          import("src/pages/certificates/GenerateCertificate.vue"),
-      },
-      {
-        path: "admit-card-generator",
-        component: () =>
-          import("src/pages/certificates/AdmitCardGenerator.vue"),
-      },
-      {
-        path: "id-card",
-        component: () => import("src/pages/certificates/idcartGenerator.vue"),
-      },
-      {
-        path: "list-certificate",
-        component: () => import("src/pages/certificates/certificateList.vue"),
-      },
-      // exam
+      // পরীক্ষা মডিউল (Exam)
       {
         path: "exam-list",
         component: () => import("src/pages/exam/examList.vue"),
@@ -178,11 +154,53 @@ const routes = [
         component: () => import("src/pages/exam/examRoutine.vue"),
       },
       {
-        path: "Result-publish",
+        path: "result-publish",
         component: () => import("src/pages/exam/ResultPublish.vue"),
       },
 
-      // library
+      // ফিন্যান্স এবং ফি (Fees)
+      {
+        path: "fee-collection",
+        component: () => import("src/pages/fees/FeeCollection.vue"),
+      },
+      {
+        path: "fee-types",
+        component: () => import("src/pages/fees/FeeType.vue"),
+      },
+      {
+        path: "fee-invoice",
+        component: () => import("src/pages/fees/FeeInvoice.vue"),
+      },
+
+      // পেরোল মডিউল (Payroll)
+      {
+        path: "payroll-setup",
+        component: () => import("src/pages/payroll/payrollSetup.vue"),
+      },
+      {
+        path: "salary-payment",
+        component: () => import("src/pages/payroll/salaryPayment.vue"),
+      },
+
+      // ইনভেন্টরি মডিউল
+      {
+        path: "product-list",
+        component: () => import("src/pages/inventory/productList.vue"),
+      },
+      {
+        path: "purchase",
+        component: () => import("src/pages/inventory/purcHase.vue"),
+      },
+      {
+        path: "stock-report",
+        component: () => import("src/pages/inventory/StockReport.vue"),
+      },
+      {
+        path: "supplier-list",
+        component: () => import("src/pages/inventory/SupplierList.vue"),
+      },
+
+      // লাইব্রেরি মডিউল
       {
         path: "book-list",
         component: () => import("src/pages/library/bookList.vue"),
@@ -196,22 +214,7 @@ const routes = [
         component: () => import("src/pages/library/bookReturn.vue"),
       },
 
-      // payrolle
-
-      {
-        path: "payroll-setup",
-        component: () => import("src/pages/payroll/payrollSetup.vue"),
-      },
-      {
-        path: "salary-payment",
-        component: () => import("src/pages/payroll/salaryPayment.vue"),
-      },
-
-      // reports
-      {
-        path: "attendance-report",
-        component: () => import("src/pages/reports/attendanceReport.vue"),
-      },
+      // রিপোর্ট মডিউল
       {
         path: "exam-reports",
         component: () => import("src/pages/reports/ExamReports.vue"),
@@ -225,42 +228,34 @@ const routes = [
         component: () => import("src/pages/reports/payrollReports.vue"),
       },
 
-      // student
+      // সার্টিফিকেট এবং নোটিশ
       {
-        path: "student-add",
-        component: () => import("src/pages/students/StudentAdd.vue"),
+        path: "notice-list",
+        component: () => import("src/pages/notice/noticeList.vue"),
       },
       {
-        path: "student-create",
-        component: () => import("src/pages/students/StudentCreate.vue"),
+        path: "generate-certificate",
+        component: () =>
+          import("src/pages/certificates/GenerateCertificate.vue"),
       },
       {
-        path: "student-details",
-        component: () => import("src/pages/students/StudentDetails.vue"),
+        path: "id-card",
+        component: () => import("src/pages/certificates/idcartGenerator.vue"),
       },
-      {
-        path: "student-list",
-        component: () => import("src/pages/students/StudentList.vue"),
-      },
-      {
-        path: "student-promote",
-        component: () => import("src/pages/students/StudentPromote.vue"),
-      },
-      // teacher
 
+      // সেটিংস
       {
-        path: "teacher-list",
-        component: () => import("src/pages/teacher/teacherList.vue"),
+        path: "school-profile",
+        component: () => import("src/pages/settings/SchoolProfile.vue"),
       },
       {
-        path: "teacher-add",
-        component: () => import("src/pages/teacher/TeacherAdd.vue"),
+        path: "user-management",
+        component: () => import("src/pages/settings/UserManagement.vue"),
       },
     ],
   },
 
-  // Always leave this as last one,
-  // but you can also remove it
+  // ৪0৪ এরর পেজ (এটি সবার শেষে থাকতে হবে)
   {
     path: "/:catchAll(.*)*",
     component: () => import("pages/ErrorNotFound.vue"),
