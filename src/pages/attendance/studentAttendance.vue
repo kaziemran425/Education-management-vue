@@ -1,192 +1,78 @@
 <template>
-  <q-page class="q-pa-md bg-grey-1">
-    <div class="row q-col-gutter-lg justify-center">
-      
-      <div class="col-12 col-md-5">
-        <q-card class="scanner-card shadow-10 text-center q-pa-lg">
-          <div class="text-h6 text-weight-bold q-mb-md">Biometric Attendance Scanner</div>
-          
-          <div class="fingerprint-wrapper q-mx-auto q-my-xl" :class="{ 'scanning': isScanning }">
-            <q-icon name="fingerprint" size="120px" :color="scanColor" />
-            <div class="scan-line" v-if="isScanning"></div>
-          </div>
+  <q-page padding class="bg-grey-1">
+    <q-card flat bordered>
+      <q-card-section class="bg-primary text-white row items-center">
+        <q-icon name="person_check" size="sm" class="q-mr-sm" />
+        <div class="text-h6">শিক্ষার্থীর উপস্থিতি (Student Attendance)</div>
+      </q-card-section>
 
-          <div class="q-px-lg">
-            <q-input 
-              filled 
-              v-model="studentID" 
-              label="Enter Student ID / Scan Card" 
-              placeholder="e.g. STD-1001"
-              bg-color="white"
-              @keyup.enter="simulateScan"
-            >
-              <template v-slot:append>
-                <q-btn round flat icon="sensors" @click="simulateScan" />
-              </template>
-            </q-input>
-          </div>
+      <q-card-section class="row q-col-gutter-sm">
+        <q-input v-model="attendanceDate" type="date" label="তারিখ" outlined dense class="col-12 col-sm-3" stack-label />
+        <q-select v-model="selectedClass" :options="classList" label="ক্লাস" outlined dense class="col-12 col-sm-3" />
+        <q-select v-model="selectedSection" :options="['A', 'B', 'C']" label="সেকশন" outlined dense class="col-12 col-sm-3" />
+        <q-btn color="primary" label="তালিকা লোড করুন" icon="sync" class="col-12 col-sm-3" @click="loadStudents" />
+      </q-card-section>
 
-          <div class="q-mt-lg text-subtitle2" :class="`text-${scanColor}`">
-            {{ statusMessage }}
-          </div>
-        </q-card>
-      </div>
+      <q-separator v-if="students.length > 0" />
 
-      <div class="col-12 col-md-7">
-        <q-card class="log-card shadow-3">
-          <q-card-section class="row items-center bg-primary text-white">
-            <div class="text-h6">Daily Attendance Log</div>
-            <q-spacer />
-            <q-chip color="white" text-color="primary" label="Date: 2026-04-28" />
-          </q-card-section>
-
-          <q-card-section class="q-pa-none">
-            <q-table
-              :rows="attendanceLog"
-              :columns="columns"
-              row-key="id"
-              flat
-              dense
-              :pagination="{ rowsPerPage: 10 }"
-            >
-              <template v-slot:body-cell-time="props">
-                <q-td :props="props">
-                  <q-badge outline color="blue-7" :label="props.row.time" />
-                </q-td>
-              </template>
-              <template v-slot:body-cell-status="props">
-                <q-td :props="props">
-                  <q-chip size="sm" color="green-1" text-color="green-9" icon="check_circle">
-                    {{ props.row.status }}
-                  </q-chip>
-                </q-td>
-              </template>
-            </q-table>
-          </q-card-section>
-        </q-card>
-      </div>
-
-    </div>
+      <q-card-section v-if="students.length > 0">
+        <q-table :rows="students" :columns="columns" row-key="id" flat bordered>
+          <template v-slot:body-cell-status="props">
+            <q-td :props="props">
+              <q-btn-toggle
+                v-model="props.row.status"
+                toggle-color="green"
+                flat
+                dense
+                :options="[
+                  {label: 'Present', value: 'P'},
+                  {label: 'Absent', value: 'A'}
+                ]"
+              />
+            </q-td>
+          </template>
+        </q-table>
+        <div class="text-right q-mt-md">
+          <q-btn color="positive" label="উপস্থিতি সেভ করুন" icon="save" @click="saveAttendance" />
+        </div>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
 
-<script>
-import { ref, reactive, onMounted } from 'vue'
-import { useQuasar, date } from 'quasar'
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useQuasar } from 'quasar'
 
-export default {
-  setup() {
-    const $q = useQuasar()
-    const studentID = ref('')
-    const isScanning = ref(false)
-    const scanColor = ref('grey-5')
-    const statusMessage = ref('Place finger on scanner or enter ID')
-    const attendanceLog = ref([])
+const $q = useQuasar()
+const attendanceDate = ref(new Date().toISOString().substr(0, 10))
+const selectedClass = ref(null)
+const selectedSection = ref(null)
+const classList = ref([])
+const students = ref([])
 
-    const columns = [
-      { name: 'id', align: 'left', label: 'ID', field: 'id' },
-      { name: 'name', align: 'left', label: 'Name', field: 'name' },
-      { name: 'time', align: 'center', label: 'Scan Time', field: 'time' },
-      { name: 'status', align: 'center', label: 'Status', field: 'status' }
-    ]
+const columns = [
+  { name: 'roll', label: 'রোল', field: 'roll', align: 'left', sortable: true },
+  { name: 'name', label: 'নাম', field: 'name', align: 'left' },
+  { name: 'status', label: 'অবস্থা (P/A)', align: 'center' }
+]
 
-    // 1. Load data from Local Storage
-    const loadLog = () => {
-      const today = date.formatDate(Date.now(), 'YYYY-MM-DD')
-      const saved = localStorage.getItem(`attendance_${today}`)
-      if (saved) attendanceLog.value = JSON.parse(saved)
-    }
+onMounted(() => {
+  const savedClasses = JSON.parse(localStorage.getItem('classes') || '[]')
+  classList.value = savedClasses.map(c => c.name)
+})
 
-    // 2. Simulate Fingerprint Scan
-    const simulateScan = () => {
-      if (!studentID.value) {
-        $q.notify({ message: 'Please enter a Student ID', color: 'negative' })
-        return
-      }
+const loadStudents = () => {
+  // এখানে আপনার স্টুডেন্ট লিস্ট লোড হবে
+  students.value = [
+    { id: 1, roll: '101', name: 'Arif Ahmed', status: 'P' },
+    { id: 2, roll: '102', name: 'Sumi Akter', status: 'P' }
+  ]
+}
 
-      isScanning.value = true
-      scanColor.value = 'blue-5'
-      statusMessage.value = 'Scanning Fingerprint...'
-
-      // Mock delay for "biometric processing"
-      setTimeout(() => {
-        isScanning.value = false
-        
-        // Logical check: In real integration, fetch user name from a "students" database
-        const newEntry = {
-          id: studentID.value,
-          name: "User " + studentID.value, // Placeholder
-          time: date.formatDate(Date.now(), 'hh:mm:ss A'),
-          status: 'Present'
-        }
-
-        // Save to List & LocalStorage
-        attendanceLog.value.unshift(newEntry)
-        const today = date.formatDate(Date.now(), 'YYYY-MM-DD')
-        localStorage.setItem(`attendance_${today}`, JSON.stringify(attendanceLog.value))
-
-        // Success State
-        scanColor.value = 'green-6'
-        statusMessage.value = `Access Granted: ${studentID.value}`
-        studentID.value = ''
-
-        // Reset scanner color after 2 seconds
-        setTimeout(() => { scanColor.value = 'grey-5'; statusMessage.value = 'Ready for next scan' }, 2000)
-      }, 1500)
-    }
-
-    onMounted(loadLog)
-
-    return {
-      studentID, isScanning, scanColor, statusMessage,
-      attendanceLog, columns, simulateScan
-    }
-  }
+const saveAttendance = () => {
+  const key = `std_attendance_${selectedClass.value}_${attendanceDate.value}`
+  localStorage.setItem(key, JSON.stringify(students.value))
+  $q.notify({ color: 'positive', message: 'উপস্থিতি সফলভাবে সেভ হয়েছে!' })
 }
 </script>
-
-<style scoped>
-.scanner-card {
-  border-radius: 20px;
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-}
-
-.fingerprint-wrapper {
-  width: 200px;
-  height: 200px;
-  border: 4px solid #f0f0f0;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  background: #fafafa;
-  transition: all 0.3s ease;
-}
-
-.scanning {
-  border-color: #2196f3;
-  box-shadow: 0 0 20px rgba(33, 150, 243, 0.3);
-}
-
-.scan-line {
-  position: absolute;
-  width: 100%;
-  height: 4px;
-  background: rgba(33, 150, 243, 0.8);
-  box-shadow: 0 0 15px #2196f3;
-  animation: scan 1.5s infinite linear;
-}
-
-@keyframes scan {
-  0% { top: 0%; }
-  100% { top: 100%; }
-}
-
-.log-card {
-  border-radius: 15px;
-  overflow: hidden;
-}
-</style>

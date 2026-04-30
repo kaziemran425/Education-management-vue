@@ -61,6 +61,15 @@
               <q-item clickable v-ripple to="/admin/asin-teacher">
                 <q-item-section>Assign Teacher</q-item-section>
               </q-item>
+                 <q-item clickable v-ripple to="/admin/subject">
+                <q-item-section>Subject </q-item-section>
+              </q-item>
+                  <q-item clickable v-ripple to="/admin/section">
+                <q-item-section>Section </q-item-section>
+              </q-item>
+                  <q-item clickable v-ripple to="/admin/class-routine">
+                <q-item-section>class Routine </q-item-section>
+              </q-item>
             </q-list>
           </q-expansion-item>
 
@@ -82,6 +91,9 @@
             <q-list class="q-pl-md">
               <q-item clickable v-ripple to="/admin/teacher-list">
                 <q-item-section>Teacher List</q-item-section>
+              </q-item>
+               <q-item clickable v-ripple to="/admin/teacher-add">
+                <q-item-section>Teacher Add</q-item-section>
               </q-item>
             </q-list>
           </q-expansion-item>
@@ -129,6 +141,9 @@
               <q-item clickable v-ripple to="/admin/exam-routine">
                 <q-item-section>Exam Routine</q-item-section>
               </q-item>
+                <q-item clickable v-ripple to="/admin/grade-setup">
+                <q-item-section>Grade Setup</q-item-section>
+              </q-item>
             </q-list>
           </q-expansion-item>
 
@@ -169,9 +184,7 @@
             group="menu"
           >
             <q-list class="q-pl-md">
-              <q-item clickable v-ripple to="/admin/fee-collection">
-                <q-item-section>Fee Collection</q-item-section>
-              </q-item>
+
               <q-item clickable v-ripple to="/admin/payroll-setup">
                 <q-item-section>Payroll Setup</q-item-section>
               </q-item>
@@ -199,6 +212,25 @@
               </q-item>
             </q-list>
           </q-expansion-item>
+
+<!-- fees -->
+
+           <q-expansion-item icon="monetization_on" label="Fees" group="menu">
+            <q-list class="q-pl-md">
+              <q-item clickable v-ripple to="/admin/fee-collection">
+                <q-item-section>Fee Collection</q-item-section>
+              </q-item>
+              <q-item clickable v-ripple to="/admin/fee-types">
+                <q-item-section>Fee Types</q-item-section>
+              </q-item>
+              <q-item clickable v-ripple to="/admin/fee-invoice">
+                <q-item-section>Fee Invoice</q-item-section>
+              </q-item>
+
+            </q-list>
+          </q-expansion-item>
+
+          <!-- certificate -->
 
           <q-expansion-item icon="verified" label="Certificate" group="menu">
             <q-list class="q-pl-md">

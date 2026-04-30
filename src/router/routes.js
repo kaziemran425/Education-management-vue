@@ -52,13 +52,26 @@ const routes = [
         path: "dashboard",
         component: () => import("src/pages/dashBoard/DashBoard.vue"),
       },
+      // academii
       {
         path: "academic-year",
         component: () => import("src/pages/academic/AcademicYear.vue"),
       },
       {
         path: "asin-teacher",
-        component: () => import("src/pages/academic/AsinTeacher.vue"),
+        component: () => import("src/pages/academic/AssignTeacher.vue"),
+      },
+      {
+        path: "section",
+        component: () => import("src/pages/academic/SectionsPage.vue"),
+      },
+      {
+        path: "subject",
+        component: () => import("src/pages/academic/SubjectsPage.vue"),
+      },
+      {
+        path: "class-routine",
+        component: () => import("src/pages/academic/ClassRoutine.vue"),
       },
       {
         path: "class",
@@ -84,13 +97,21 @@ const routes = [
         component: () => import("src/pages/attendance/staffAttendance.vue"),
       },
 
-
       // fees
 
       {
         path: "fee-collection",
         component: () => import("src/pages/fees/FeeCollection.vue"),
       },
+      {
+        path: "fee-invoice",
+        component: () => import("src/pages/fees/FeeInvoice.vue"),
+      },
+      {
+        path: "fee-types",
+        component: () => import("src/pages/fees/FeeType.vue"),
+      },
+
       // inventory
 
       {
@@ -145,6 +166,10 @@ const routes = [
         component: () => import("src/pages/exam/examCreat.vue"),
       },
       {
+        path: "grade-setup",
+        component: () => import("src/pages/exam/GradeSetup.vue"),
+      },
+      {
         path: "mark-entry",
         component: () => import("src/pages/exam/markEntry.vue"),
       },
@@ -154,7 +179,7 @@ const routes = [
       },
       {
         path: "Result-publish",
-        component: () => import("src/pages/exam/resaltPublist.vue"),
+        component: () => import("src/pages/exam/ResultPublish.vue"),
       },
 
       // library
@@ -175,13 +200,12 @@ const routes = [
 
       {
         path: "payroll-setup",
-        component: () => import("src/pages/payrolle/payrollSetup.vue"),
+        component: () => import("src/pages/payroll/payrollSetup.vue"),
       },
       {
         path: "salary-payment",
-        component: () => import("src/pages/payrolle/salaryPayment.vue"),
+        component: () => import("src/pages/payroll/salaryPayment.vue"),
       },
-
 
       // reports
       {
@@ -227,6 +251,10 @@ const routes = [
       {
         path: "teacher-list",
         component: () => import("src/pages/teacher/teacherList.vue"),
+      },
+      {
+        path: "teacher-add",
+        component: () => import("src/pages/teacher/TeacherAdd.vue"),
       },
     ],
   },
