@@ -1,117 +1,106 @@
 <template>
-  <div class="forgot-password-container flex flex-center">
-    <q-card class="my-card shadow-12">
-      <q-card-section class="bg-primary text-white text-center">
-        <div class="text-h6">Forgot Your Password?</div>
-        <div class="text-caption">Enter your email to receive a reset link</div>
+  <q-page class="flex flex-center bg-grey-2 padding">
+    <q-card class="auth-card shadow-4" bordered>
+
+      <q-card-section class="text-center q-pb-none">
+        <q-avatar size="72px" class="q-mb-sm">
+          <img src="https://cdn.quasar.dev/logo-v2/svg/logo.svg" alt="App Logo">
+        </q-avatar>
+        <div class="text-h5 text-weight-bold q-mt-sm">Reset Password</div>
+        <div class="text-caption text-grey-7 q-mt-xs">
+          Enter your email address and we'll send you a link to reset your password.
+        </div>
       </q-card-section>
 
-      <q-card-section class="q-pa-xl">
-        <q-form @submit="handleForgotPassword" class="q-gutter-y-md">
-
+      <q-card-section>
+        <q-form @submit="onSubmit" class="q-gutter-md">
           <q-input
             outlined
-            v-model="forgotForm.email"
+            v-model="email"
             label="Email Address"
-            dense
+            type="email"
             lazy-rules
             :rules="[
               val => !!val || 'Email is required',
-              val => /.+@.+\..+/.test(val) || 'Invalid email'
+              val => isValidEmail(val) || 'Please enter a valid email address'
             ]"
           >
             <template v-slot:prepend>
-              <q-icon name="email" color="primary" />
+              <q-icon name="email" />
             </template>
           </q-input>
 
-          <q-btn
-            type="submit"
-            color="primary"
-            label="Send Reset Link"
-            class="full-width q-py-sm text-weight-bold"
-            unelevated
-            rounded
-          />
-
-          <div class="text-center q-mt-md">
-            <q-btn flat no-caps color="grey-7" label="Back to Login" icon="arrow_back" size="sm" />
+          <div>
+            <q-btn
+              class="full-width q-mt-md"
+              color="primary"
+              label="Send Reset Link"
+              type="submit"
+              :loading="loading"
+              unelevated
+            />
           </div>
         </q-form>
       </q-card-section>
+
+      <q-card-section class="text-center q-pt-none">
+        <q-btn
+          flat
+          color="grey-8"
+          label="Back to Login"
+          to="/auth/login"
+          no-caps
+          class="full-width"
+        />
+      </q-card-section>
+
     </q-card>
-  </div>
+  </q-page>
 </template>
 
-<script>
-import { reactive } from 'vue'
+<script setup>
+import { ref } from 'vue'
 import { useQuasar } from 'quasar'
+import { useRouter } from 'vue-router'
 
-export default {
-  setup() {
-    const $q = useQuasar()
+const $q = useQuasar()
+const router = useRouter()
 
-    // 1. Reactive form data
-    const forgotForm = reactive({
-      email: ''
+const email = ref('')
+const loading = ref(false)
+
+// Simple email regex validation
+const isValidEmail = (val) => {
+  const emailPattern = /^(?=[a-zA-Z0-9@._%+-]{6,254}$)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/
+  return emailPattern.test(val)
+}
+
+const onSubmit = () => {
+  loading.value = true
+
+  // Simulate API call to send reset email
+  setTimeout(() => {
+    loading.value = false
+
+    $q.notify({
+      type: 'positive',
+      message: 'Password reset link sent! Please check your inbox.',
+      position: 'top-right'
     })
 
-    // 2. Logic to handle the reset request
-    const handleForgotPassword = () => {
-      // Check if users exist in Local Storage (from your Registration page)
-      const users = JSON.parse(localStorage.getItem('registered_users') || '[]')
+    // Clear input
+    email.value = ''
 
-      // Smart Check: Does this email exist in our "database"?
-      const userExists = users.find(u => u.email === forgotForm.email)
-
-      $q.loading.show({ message: 'Validating email...' })
-
-      // Simulate API Delay
-      setTimeout(() => {
-        $q.loading.hide()
-
-        if (userExists) {
-          $q.notify({
-            color: 'positive',
-            icon: 'check_circle',
-            message: 'Reset link has been sent to your email!',
-            position: 'top'
-          })
-          console.log("Reset link sent for:", forgotForm.email)
-        } else {
-          $q.notify({
-            color: 'negative',
-            icon: 'error',
-            message: 'This email is not registered with us.',
-            position: 'top'
-          })
-        }
-      }, 1500)
-    }
-
-    return {
-      forgotForm,
-      handleForgotPassword
-    }
-  }
+    // Optionally redirect back to login
+    router.push('/auth/login')
+  }, 1500)
 }
 </script>
 
 <style scoped>
-.forgot-password-container {
-  height: 100vh;
-  background: #f0f4f8;
-}
-
-.my-card {
+.auth-card {
   width: 100%;
-  max-width: 450px;
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-/* Customizing the shadow for a "Smart" look */
-.shadow-12 {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  max-width: 400px;
+  border-radius: 12px;
 }
 </style>

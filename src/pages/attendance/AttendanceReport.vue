@@ -1,45 +1,69 @@
 <template>
-  <q-page padding>
+  <q-page class="q-pa-md">
+    <div class="row items-center justify-between q-mb-md">
+      <div class="text-h5 text-weight-bold text-indigo-10">Attendance Overview</div>
+      <q-btn color="indigo-10" label="Export CSV" icon="file_download" unelevated />
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row q-col-gutter-md q-mb-lg">
+      <div class="col-12 col-md-4" v-for="stat in stats" :key="stat.label">
+        <q-card bordered flat class="bg-white">
+          <q-card-section class="flex justify-between items-center">
+            <div>
+              <div class="text-grey-7">{{ stat.label }}</div>
+              <div class="text-h4 text-weight-bolder">{{ stat.value }}%</div>
+            </div>
+            <q-icon :name="stat.icon" size="md" color="indigo-10" />
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
+
+    <!-- History Table -->
     <q-card flat bordered>
-      <q-card-section class="bg-blue-grey text-white text-h6">উপস্থিতি রিপোর্ট (Attendance Report)</q-card-section>
-      <q-card-section class="row q-col-gutter-sm">
-        <q-select v-model="reportType" :options="['Student', 'Teacher', 'Staff']" label="রিপোর্ট টাইপ" outlined dense class="col-4" />
-        <q-input v-model="searchDate" type="date" label="তারিখ" outlined dense stack-label class="col-4" />
-        <q-btn color="blue-grey" label="রিপোর্ট দেখুন" icon="search" class="col-4" @click="generateReport" />
+      <q-card-section class="bg-indigo-1 text-indigo-10 flex items-center">
+        <q-icon name="history" class="q-mr-sm" />
+        <div class="text-h6">Recent Submission Logs</div>
       </q-card-section>
 
-      <q-card-section v-if="reportData.length">
-        <q-table :rows="reportData" :columns="reportCols" flat bordered />
-      </q-card-section>
+      <q-table :rows="history" :columns="repCols" row-key="date" flat>
+        <template v-slot:body-cell-action="props">
+          <q-td :props="props">
+            <q-btn flat color="primary" label="View Data" icon="launch" size="sm" />
+          </q-td>
+        </template>
+      </q-table>
     </q-card>
   </q-page>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script>
+import { ref, onMounted } from 'vue'
 
-const reportType = ref('Student')
-const searchDate = ref('')
-const reportData = ref([])
-const reportCols = [
-  { name: 'name', label: 'নাম', field: 'name', align: 'left' },
-  { name: 'status', label: 'অবস্থা', field: 'status', align: 'center' }
-]
+export default {
+  setup() {
+    const stats = ref([
+      { label: 'Student Avg.', value: '94', icon: 'school' },
+      { label: 'Teacher Avg.', value: '98', icon: 'supervisor_account' },
+      { label: 'Staff Avg.', value: '91', icon: 'badge' }
+    ])
+    const history = ref([])
+    const repCols = [
+      { name: 'date', label: 'Date', field: 'date', align: 'left' },
+      { name: 'type', label: 'Type', field: 'type', align: 'left' },
+      { name: 'action', label: 'Actions', align: 'right' }
+    ]
 
-const generateReport = () => {
-  let key = ''
-  if (reportType.value === 'Student') key = `std_attendance_` // এটি আরও ডাইনামিক করা যাবে
-  else if (reportType.value === 'Teacher') key = `teacher_attendance_${searchDate.value}`
+    onMounted(() => {
+      const data = JSON.parse(localStorage.getItem('iching_attendance_records') || '[]')
+      history.value = data.reverse().map(r => ({
+        date: new Date(r.date).toLocaleDateString(),
+        type: r.type
+      }))
+    })
 
-  const data = localStorage.getItem(key)
-  if (data) {
-    reportData.value = JSON.parse(data).map(d => ({
-      name: d.name,
-      status: d.present || d.status === 'P' ? 'Present' : 'Absent'
-    }))
-  } else {
-    alert('কোনো ডাটা পাওয়া যায়নি!')
-    reportData.value = []
+    return { stats, history, repCols }
   }
 }
 </script>

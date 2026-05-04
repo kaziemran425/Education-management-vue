@@ -1,41 +1,47 @@
 <template>
-  <q-page padding>
-    <q-card flat bordered>
-      <q-card-section class="bg-secondary text-white">
-        <div class="text-h6">শিক্ষক উপস্থিতি (Teacher Attendance)</div>
-      </q-card-section>
-
-      <q-card-section>
-        <q-input v-model="date" type="date" label="তারিখ" outlined dense stack-label class="q-mb-md" />
-        <q-table :rows="teachers" :columns="tColumns" flat bordered>
-          <template v-slot:body-cell-attendance="props">
-            <q-td :props="props">
-              <q-checkbox v-model="props.row.present" label="Present" color="green" />
-            </q-td>
-          </template>
-        </q-table>
-        <q-btn color="secondary" label="সেভ করুন" class="q-mt-md full-width" @click="saveTAttendance" />
-      </q-card-section>
+  <q-page class="q-pa-md">
+    <div class="text-h5 text-weight-bold text-indigo-10 q-mb-md">Teacher Attendance</div>
+    <q-card flat bordered class="q-pa-md">
+      <q-list separator>
+        <q-item v-for="teacher in teachers" :key="teacher.id">
+          <q-item-section>
+            <q-item-label class="text-weight-bold">{{ teacher.name }}</q-item-label>
+            <q-item-label caption>ID: {{ teacher.id }}</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-select
+              v-model="teacher.status"
+              :options="['Present', 'Absent', 'On Leave']"
+              outlined dense style="width: 150px"
+            />
+          </q-item-section>
+        </q-item>
+      </q-list>
+      <q-btn color="indigo-10" label="Submit Attendance" class="full-width q-mt-md" @click="submit" unelevated />
     </q-card>
   </q-page>
 </template>
 
-<script setup>
+<script>
 import { ref } from 'vue'
+import { useQuasar } from 'quasar'
 
-const date = ref(new Date().toISOString().substr(0, 10))
-const teachers = ref([
-  { id: 1, name: 'Mr. Rahim', present: true },
-  { id: 2, name: 'Ms. Karima', present: true }
-])
+export default {
+  setup() {
+    const $q = useQuasar()
+    const teachers = ref([
+      { id: 'T-101', name: 'John Doe', status: 'Present' },
+      { id: 'T-102', name: 'Sarah Khan', status: 'Present' }
+    ])
 
-const tColumns = [
-  { name: 'name', label: 'শিক্ষকের নাম', field: 'name', align: 'left' },
-  { name: 'attendance', label: 'উপস্থিতি', align: 'center' }
-]
+    const submit = () => {
+      const records = JSON.parse(localStorage.getItem('iching_attendance_records') || '[]')
+      records.push({ date: new Date().toLocaleDateString(), type: 'Teacher', data: teachers.value })
+      localStorage.setItem('iching_attendance_records', JSON.stringify(records))
+      $q.notify({ type: 'positive', message: 'Teacher records updated' })
+    }
 
-const saveTAttendance = () => {
-  localStorage.setItem(`teacher_attendance_${date.value}`, JSON.stringify(teachers.value))
-  alert('শিক্ষকদের উপস্থিতি সেভ হয়েছে।')
+    return { teachers, submit }
+  }
 }
 </script>

@@ -3,6 +3,7 @@
 A Quasar Project
 
 ## Install the dependencies
+
 ```bash
 yarn
 # or
@@ -10,18 +11,21 @@ npm install
 ```
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
+
 ```bash
 quasar dev
 ```
 
-
 ### Build the app for production
+
 ```bash
 quasar build
 ```
 
 ### Customize the configuration
+
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
+
 
 ```
 E-ducation-vue
@@ -63,8 +67,11 @@ E-ducation-vue
    │  ├─ SubscriptionPlans.vue
    │  ├─ academic
    │  │  ├─ AcademicYear.vue
-   │  │  ├─ AsinTeacher.vue
-   │  │  └─ ClassEs.vue
+   │  │  ├─ AssignTeacher.vue
+   │  │  ├─ ClassEs.vue
+   │  │  ├─ ClassRoutine.vue
+   │  │  ├─ SectionsPage.vue
+   │  │  └─ SubjectsPage.vue
    │  ├─ attendance
    │  │  ├─ AttendanceReport.vue
    │  │  ├─ TeacherAttendance.vue
@@ -81,14 +88,21 @@ E-ducation-vue
    │  │  └─ idcartGenerator.vue
    │  ├─ dashBoard
    │  │  └─ DashBoard.vue
+   │  ├─ dashbBoard.vue
    │  ├─ exam
+   │  │  ├─ GradeSetup.vue
+   │  │  ├─ ResultPublish.vue
    │  │  ├─ examCreat.vue
    │  │  ├─ examList.vue
    │  │  ├─ examRoutine.vue
-   │  │  ├─ markEntry.vue
-   │  │  └─ resaltPublist.vue
+   │  │  └─ markEntry.vue
    │  ├─ fees
-   │  │  └─ FeeCollection.vue
+   │  │  ├─ FeeCollection.vue
+   │  │  ├─ FeeInvoice.vue
+   │  │  └─ FeeType.vue
+   │  ├─ hostel
+   │  │  ├─ HostelList.vue
+   │  │  └─ RoomManagement.vue
    │  ├─ inventory
    │  │  ├─ StockReport.vue
    │  │  ├─ SupplierList.vue
@@ -101,7 +115,7 @@ E-ducation-vue
    │  ├─ notice
    │  │  └─ noticeList.vue
    │  ├─ paymentHistory.vue
-   │  ├─ payrolle
+   │  ├─ payroll
    │  │  ├─ payrollSetup.vue
    │  │  └─ salaryPayment.vue
    │  ├─ reports
@@ -110,6 +124,9 @@ E-ducation-vue
    │  │  ├─ attendanceReport.vue
    │  │  └─ payrollReports.vue
    │  ├─ schoolList.vue
+   │  ├─ settings
+   │  │  ├─ SchoolProfile.vue
+   │  │  └─ UserManagement.vue
    │  ├─ students
    │  │  ├─ StudentAdd.vue
    │  │  ├─ StudentCreate.vue
@@ -117,6 +134,7 @@ E-ducation-vue
    │  │  ├─ StudentList.vue
    │  │  └─ StudentPromote.vue
    │  └─ teacher
+   │     ├─ TeacherAdd.vue
    │     └─ teacherList.vue
    ├─ router
    │  ├─ index.js

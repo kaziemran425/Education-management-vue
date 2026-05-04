@@ -1,20 +1,30 @@
 <template>
-  <q-page padding>
-    <q-card flat bordered>
-      <q-card-section class="row items-center">
-        <div class="text-h6">শিক্ষার্থী তালিকা</div>
-        <q-space />
-        <q-input v-model="search" placeholder="নাম বা রোল দিয়ে খুঁজুন" dense outlined class="q-mr-sm">
-          <template v-slot:append><q-icon name="search" /></template>
-        </q-input>
-        <q-btn color="primary" label="নতুন শিক্ষার্থী" icon="add" to="/students/StudentAdd" />
-      </q-card-section>
+  <q-page class="q-pa-md">
+    <div class="row items-center justify-between q-mb-md">
+      <div class="text-h5 text-weight-bold text-indigo-10">
+        <q-icon name="group" class="q-mr-sm" />Student Directory
+      </div>
+      <q-btn color="primary" icon="add" label="New Admission" to="/admin/students/add" unelevated />
+    </div>
 
-      <q-table :rows="filteredStudents" :columns="columns" flat bordered row-key="id">
+    <q-card flat bordered>
+      <q-table
+        :rows="students"
+        :columns="columns"
+        row-key="id"
+        flat
+        :filter="filter"
+      >
+        <template v-slot:top-right>
+          <q-input borderless dense debounce="300" v-model="filter" placeholder="Search Student">
+            <template v-slot:append><q-icon name="search" /></template>
+          </q-input>
+        </template>
+
         <template v-slot:body-cell-actions="props">
-          <q-td :props="props">
-            <q-btn flat round color="blue" icon="visibility" size="sm" @click="$router.push(`/students/StudentDetails?id=${props.row.id}`)" />
-            <q-btn flat round color="red" icon="delete" size="sm" @click="deleteStudent(props.row.id)" />
+          <q-td :props="props" class="q-gutter-x-sm">
+            <q-btn flat round color="primary" icon="visibility" size="sm" @click="viewDetails(props.row.id)" />
+            <q-btn flat round color="negative" icon="delete" size="sm" @click="deleteStudent(props.row.id)" />
           </q-td>
         </template>
       </q-table>
@@ -22,33 +32,43 @@
   </q-page>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
+<script>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 
-const students = ref([])
-const search = ref('')
+export default {
+  setup() {
+    const router = useRouter()
+    const $q = useQuasar()
+    const students = ref([])
+    const filter = ref('')
 
-const columns = [
-  { name: 'roll', label: 'রোল', field: 'roll', align: 'left', sortable: true },
-  { name: 'name', label: 'নাম', field: 'name', align: 'left' },
-  { name: 'class', label: 'ক্লাস', field: 'class', align: 'center' },
-  { name: 'phone', label: 'মোবাইল', field: 'phone', align: 'center' },
-  { name: 'actions', label: 'অ্যাকশন', align: 'right' }
-]
+    const columns = [
+      { name: 'roll', align: 'left', label: 'Roll', field: 'roll', sortable: true },
+      { name: 'name', align: 'left', label: 'Student Name', field: 'name', sortable: true },
+      { name: 'class', align: 'center', label: 'Class', field: 'class' },
+      { name: 'actions', align: 'right', label: 'Actions' }
+    ]
 
-const loadData = () => { students.value = JSON.parse(localStorage.getItem('students') || '[]') }
+    const loadData = () => {
+      const data = localStorage.getItem('iching_students')
+      students.value = data ? JSON.parse(data) : []
+    }
 
-const filteredStudents = computed(() => {
-  return students.value.filter(s =>
-    s.name.toLowerCase().includes(search.value.toLowerCase()) ||
-    s.roll.includes(search.value)
-  )
-})
+    const deleteStudent = (id) => {
+      $q.dialog({ title: 'Confirm', message: 'Delete this record?', cancel: true }).onOk(() => {
+        students.value = students.value.filter(s => s.id !== id)
+        localStorage.setItem('iching_students', JSON.stringify(students.value))
+        $q.notify({ type: 'positive', message: 'Deleted successfully' })
+      })
+    }
 
-const deleteStudent = (id) => {
-  students.value = students.value.filter(s => s.id !== id)
-  localStorage.setItem('students', JSON.stringify(students.value))
+    const viewDetails = (id) => router.push(`/admin/students/details?id=${id}`)
+
+    onMounted(loadData)
+
+    return { students, columns, filter, deleteStudent, viewDetails }
+  }
 }
-
-onMounted(loadData)
 </script>

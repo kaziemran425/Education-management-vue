@@ -1,78 +1,86 @@
 <template>
-  <q-page padding class="bg-grey-1">
-    <q-card flat bordered>
-      <q-card-section class="bg-primary text-white row items-center">
-        <q-icon name="person_check" size="sm" class="q-mr-sm" />
-        <div class="text-h6">শিক্ষার্থীর উপস্থিতি (Student Attendance)</div>
-      </q-card-section>
+  <q-page class="q-pa-md">
+    <div class="row items-center justify-between q-mb-md">
+      <div class="text-h5 text-weight-bold text-indigo-10">
+        <q-icon name="person_check" class="q-mr-sm" />Student Attendance
+      </div>
 
-      <q-card-section class="row q-col-gutter-sm">
-        <q-input v-model="attendanceDate" type="date" label="তারিখ" outlined dense class="col-12 col-sm-3" stack-label />
-        <q-select v-model="selectedClass" :options="classList" label="ক্লাস" outlined dense class="col-12 col-sm-3" />
-        <q-select v-model="selectedSection" :options="['A', 'B', 'C']" label="সেকশন" outlined dense class="col-12 col-sm-3" />
-        <q-btn color="primary" label="তালিকা লোড করুন" icon="sync" class="col-12 col-sm-3" @click="loadStudents" />
-      </q-card-section>
-
-      <q-separator v-if="students.length > 0" />
-
-      <q-card-section v-if="students.length > 0">
-        <q-table :rows="students" :columns="columns" row-key="id" flat bordered>
-          <template v-slot:body-cell-status="props">
-            <q-td :props="props">
-              <q-btn-toggle
-                v-model="props.row.status"
-                toggle-color="green"
-                flat
-                dense
-                :options="[
-                  {label: 'Present', value: 'P'},
-                  {label: 'Absent', value: 'A'}
-                ]"
-              />
-            </q-td>
+      <div class="row q-gutter-sm">
+        <q-btn outline color="primary" label="Mark All Present" icon="done_all" @click="markAllPresent" />
+        <q-input filled v-model="attendanceDate" mask="date" dense style="width: 170px">
+          <template v-slot:append>
+            <q-icon name="event" class="cursor-pointer">
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-date v-model="attendanceDate">
+                  <div class="row items-center justify-end"><q-btn v-close-popup label="Close" color="primary" flat /></div>
+                </q-date>
+              </q-popup-proxy>
+            </q-icon>
           </template>
-        </q-table>
-        <div class="text-right q-mt-md">
-          <q-btn color="positive" label="উপস্থিতি সেভ করুন" icon="save" @click="saveAttendance" />
-        </div>
-      </q-card-section>
+        </q-input>
+      </div>
+    </div>
+
+    <q-card flat bordered>
+      <q-table :rows="attendanceList" :columns="columns" row-key="id" flat>
+        <template v-slot:body-cell-status="props">
+          <q-td :props="props">
+            <q-btn-toggle
+              v-model="props.row.status"
+              toggle-color="indigo-10"
+              unelevated
+              dense
+              :options="[
+                {label: 'Present', value: 'Present'},
+                {label: 'Absent', value: 'Absent'},
+                {label: 'Late', value: 'Late'}
+              ]"
+            />
+          </q-td>
+        </template>
+      </q-table>
+      <q-separator />
+      <q-card-actions align="right" class="q-pa-md">
+        <q-btn label="Save Attendance" color="indigo-10" icon="cloud_upload" @click="saveAttendance" unelevated />
+      </q-card-actions>
     </q-card>
   </q-page>
 </template>
 
-<script setup>
+<script>
 import { ref, onMounted } from 'vue'
 import { useQuasar } from 'quasar'
 
-const $q = useQuasar()
-const attendanceDate = ref(new Date().toISOString().substr(0, 10))
-const selectedClass = ref(null)
-const selectedSection = ref(null)
-const classList = ref([])
-const students = ref([])
+export default {
+  setup() {
+    const $q = useQuasar()
+    const attendanceDate = ref(new Date().toISOString().split('T')[0].replace(/-/g, '/'))
+    const attendanceList = ref([])
 
-const columns = [
-  { name: 'roll', label: 'রোল', field: 'roll', align: 'left', sortable: true },
-  { name: 'name', label: 'নাম', field: 'name', align: 'left' },
-  { name: 'status', label: 'অবস্থা (P/A)', align: 'center' }
-]
+    const columns = [
+      { name: 'roll', align: 'left', label: 'Roll', field: 'roll' },
+      { name: 'name', align: 'left', label: 'Name', field: 'name' },
+      { name: 'status', align: 'center', label: 'Status', field: 'status' }
+    ]
 
-onMounted(() => {
-  const savedClasses = JSON.parse(localStorage.getItem('classes') || '[]')
-  classList.value = savedClasses.map(c => c.name)
-})
+    const loadStudents = () => {
+      const students = JSON.parse(localStorage.getItem('iching_students') || '[]')
+      attendanceList.value = students.map(s => ({ ...s, status: 'Present' }))
+    }
 
-const loadStudents = () => {
-  // এখানে আপনার স্টুডেন্ট লিস্ট লোড হবে
-  students.value = [
-    { id: 1, roll: '101', name: 'Arif Ahmed', status: 'P' },
-    { id: 2, roll: '102', name: 'Sumi Akter', status: 'P' }
-  ]
-}
+    const markAllPresent = () => {
+      attendanceList.value.forEach(s => s.status = 'Present')
+    }
 
-const saveAttendance = () => {
-  const key = `std_attendance_${selectedClass.value}_${attendanceDate.value}`
-  localStorage.setItem(key, JSON.stringify(students.value))
-  $q.notify({ color: 'positive', message: 'উপস্থিতি সফলভাবে সেভ হয়েছে!' })
+    const saveAttendance = () => {
+      const allData = JSON.parse(localStorage.getItem('iching_attendance_records') || '[]')
+      allData.push({ date: attendanceDate.value, type: 'Student', data: attendanceList.value })
+      localStorage.setItem('iching_attendance_records', JSON.stringify(allData))
+      $q.notify({ type: 'positive', message: 'Student attendance saved', icon: 'check' })
+    }
+
+    onMounted(loadStudents)
+    return { attendanceDate, attendanceList, columns, saveAttendance, markAllPresent }
+  }
 }
 </script>

@@ -1,186 +1,82 @@
 <template>
-  <q-page class="flex flex-center bg-grey-2">
-    <q-card class="auth-card shadow-10">
-      <!-- Header Section -->
-      <q-card-section class="bg-teal text-white text-center q-pa-lg">
-        <q-icon name="admin_panel_settings" size="64px" />
-        <div class="text-h5 text-weight-bold">Welcome Back</div>
-        <div class="text-caption">Login to your School Management Account</div>
-      </q-card-section>
+  <q-card class="login-card shadow-24 rounded-borders">
+    <div class="row">
+      <div class="col-12 col-md-5 bg-primary text-white flex flex-center q-pa-xl text-center">
+        <div>
+          <q-icon name="apartment" size="100px" />
+          <div class="text-h4 text-weight-bolder">Iching</div>
+          <div class="text-subtitle1 opacity-80">Smart Property Management</div>
+        </div>
+      </div>
 
-      <!-- Form Section -->
-      <q-card-section class="q-pa-xl">
-        <q-form @submit.prevent="onLoginSubmit" class="q-gutter-y-md">
+      <div class="col-12 col-md-7 q-pa-xl bg-white">
+        <div class="text-h5 text-weight-bold q-mb-md">Welcome Back</div>
 
-          <q-input
-            outlined
-            v-model="loginForm.email"
-            label="Email Address"
-            dense
-            lazy-rules
-            :rules="[val => !!val || 'Email is required', val => /.+@.+\..+/.test(val) || 'Invalid email']"
-          >
-            <template v-slot:prepend>
-              <q-icon name="email" color="teal" />
-            </template>
+        <q-form @submit.prevent="handleLogin" class="q-gutter-y-md">
+          <q-input outlined v-model="credentials.email" label="Email" type="email" :rules="[val => !!val || 'Required']">
+            <template v-slot:prepend><q-icon name="email" /></template>
           </q-input>
 
-          <q-input
-            outlined
-            v-model="loginForm.password"
-            label="Password"
-            :type="isPassword ? 'password' : 'text'"
-            dense
-            lazy-rules
-            :rules="[val => !!val || 'Password is required']"
-          >
-            <template v-slot:prepend>
-              <q-icon name="lock" color="teal" />
-            </template>
+          <q-input outlined v-model="credentials.password" label="Password" :type="showPwd ? 'text' : 'password'">
+            <template v-slot:prepend><q-icon name="lock" /></template>
             <template v-slot:append>
-              <q-icon
-                :name="isPassword ? 'visibility_off' : 'visibility'"
-                class="cursor-pointer"
-                @click="isPassword = !isPassword"
-              />
+              <q-icon :name="showPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="showPwd = !showPwd" />
             </template>
           </q-input>
 
-          <div class="row items-center justify-between no-wrap">
-            <q-checkbox v-model="rememberMe" label="Remember me" size="sm" color="primary" />
-            <q-btn flat no-caps color="primary" label="Forgot Password?" to="/auth/forgot-password" size="sm" />
+          <q-btn type="submit" color="primary" class="full-width text-weight-bold" size="lg" label="Sign In" :loading="isLoading" unelevated />
+
+          <div class="row justify-between q-mt-md">
+            <q-btn flat color="grey-7" label="Create Account" to="/auth/register" no-caps />
+            <q-btn flat color="primary" label="Forgot Password?" to="/auth/forgot-password" no-caps />
           </div>
-
-          <q-btn
-            type="submit"
-            color="teal"
-            label="Login Now"
-            class="full-width q-py-sm text-weight-bold"
-            unelevated
-            :loading="loading"
-          />
-
-          <div class="text-center q-mt-md">
-            <span class="text-grey-7">New school?</span>
-            <q-btn flat no-caps color="secondary" label="Register Instance" to="/auth/registration" dense class="q-ml-xs" />
-          </div>
-
-          <!-- Role Hint for testing -->
-          <div class="text-center q-mt-sm text-caption text-grey-6">
-            Admin: admin@mail.com | User: user@mail.com
-          </div>
-
         </q-form>
-      </q-card-section>
-    </q-card>
-  </q-page>
+      </div>
+    </div>
+  </q-card>
 </template>
 
-<script>
-import { reactive, ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useQuasar } from 'quasar';
+<script setup>
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
+import { useAuthStore } from 'src/stores/auth-store'
 
-export default {
-  name: 'LoginPage',
-  setup() {
-    const $q = useQuasar();
-    const router = useRouter();
+const auth = useAuthStore()
+const router = useRouter()
+const $q = useQuasar()
 
-    // State
-    const loading = ref(false);
-    const isPassword = ref(true);
-    const rememberMe = ref(false);
+const isLoading = ref(false)
+const showPwd = ref(false)
+const credentials = reactive({ email: '', password: '' })
 
-    const loginForm = reactive({
-      email: '',
-      password: ''
+const handleLogin = async () => {
+  isLoading.value = true;
+  try {
+    // স্টোর থেকে রেসপন্স নেওয়া হচ্ছে
+    const response = await auth.login(credentials.email, credentials.password);
+
+    $q.notify({
+      type: 'positive',
+      message: `Welcome back, ${response.role}!`,
+      position: 'top-right'
     });
 
-    // On Mount: Check LocalStorage for saved email (Remember Me)
-    onMounted(() => {
-      const savedEmail = localStorage.getItem('remembered_email');
-      if (savedEmail) {
-        loginForm.email = savedEmail;
-        rememberMe.value = true;
-      }
+    // রোল অনুযায়ী সঠিক প্যানেলে রিডাইরেক্ট
+    router.push(response.redirect);
+
+  } catch (err) {
+    $q.notify({
+      type: 'negative',
+      message: 'Login Failed! Please check your email.',
+      position: 'bottom'
     });
-
-    // Marched Login Logic
-    const onLoginSubmit = async () => {
-      loading.value = true;
-
-      try {
-        // ১. Local Storage Handling for "Remember Me"
-        if (rememberMe.value) {
-          localStorage.setItem('remembered_email', loginForm.email);
-        } else {
-          localStorage.removeItem('remembered_email');
-        }
-
-        // ২. Simulate API Call & Session Logic
-        setTimeout(() => {
-          // ৩. Role Determination (Based on your logic)
-          // এখানে কন্ডিশনাল রোল সেট করা হয়েছে:
-          const assignedRole = loginForm.email === 'admin@mail.com' ? 'admin' : 'user';
-
-          const userData = {
-            isLoggedIn: true,
-            email: loginForm.email,
-            role: assignedRole,
-            token: 'simulated-jwt-token-' + Date.now()
-          };
-
-          // ৪. Save Session Data to LocalStorage
-          localStorage.setItem('user_session', JSON.stringify(userData));
-
-          loading.value = false;
-
-          $q.notify({
-            type: 'positive',
-            message: `Welcome! Logged in as ${assignedRole.toUpperCase()}`,
-            position: 'top'
-          });
-
-          // ৫. Smart Redirection based on role
-          if (userData.role === 'admin') {
-            router.push('/admin/dashboard');
-          } else {
-            router.push('/dashboard');
-          }
-        }, 1500);
-
-      } catch (error) {
-        loading.value = false;
-        $q.notify({
-          type: 'negative',
-          message: 'Authentication Failed. Please check your credentials.'
-        });
-      }
-    };
-
-    return {
-      loginForm,
-      isPassword,
-      rememberMe,
-      loading,
-      onLoginSubmit
-    };
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>
 
 <style scoped>
-.auth-card {
-  width: 100%;
-  max-width: 450px;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-/* Subtle card hover animation */
-.auth-card:hover {
-  transform: translateY(-5px);
-  transition: transform 0.3s ease;
-}
+.login-card { width: 100%; max-width: 900px; }
 </style>

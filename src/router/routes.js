@@ -1,43 +1,10 @@
 const routes = [
-  // MAIN LAYOUT (ইউজার বা জেনারেল সাইড)
-  {
-    path: "/",
-    component: () => import("layouts/MainLayout.vue"),
-    meta: { requiresAuth: true, role: "user" },
-    children: [
-      { path: "", redirect: "/dashboard" },
-      {
-        path: "dashboard",
-        component: () => import("pages/dashbBoard.vue"), // আপনার ফাইলের নামের বানান নিশ্চিত করুন
-      },
-      {
-        path: "payment-history",
-        component: () => import("pages/paymentHistory.vue"),
-      },
-      {
-        path: "subscription-plans",
-        component: () => import("pages/SubscriptionPlans.vue"),
-      },
-      {
-        path: "school-list",
-        component: () => import("pages/schoolList.vue"),
-      },
-    ],
-  },
-
-  // AUTH LAYOUT (লগইন এবং রেজিস্ট্রেশন)
   {
     path: "/auth",
-    component: () => import("layouts/AuthLayout.vue"), // ইমপোর্ট পাথ চেক করুন
+    component: () => import("layouts/AuthLayout.vue"),
     children: [
-      {
-        path: "login",
-        component: () => import("pages/auth/loginPage.vue"),
-      },
-      {
-        path: "registration",
-        component: () => import("pages/auth/regiPage.vue"),
-      },
+      { path: "login", component: () => import("pages/auth/loginPage.vue") },
+      { path: "register", component: () => import("pages/auth/regiPage.vue") },
       {
         path: "forgot-password",
         component: () => import("pages/auth/forgotePass.vue"),
@@ -45,217 +12,237 @@ const routes = [
     ],
   },
 
-  // ADMIN LAYOUT (মূল স্কুল ম্যানেজমেন্ট সিস্টেম)
+  {
+    path: "/panel",
+    component: () => import("layouts/MainLayout.vue"),
+    meta: {
+      requiresAuth: true,
+      roles: ["user", "teacher", "student", "accountant"],
+    },
+    children: [
+      { path: "", component: () => import("pages/dashbBoard.vue") },
+      { path: "index", component: () => import("pages/IndexPage.vue") },
+      {
+        path: "subscription",
+        component: () => import("pages/SubscriptionPlans.vue"),
+      },
+      {
+        path: "payment-history",
+        component: () => import("pages/paymentHistory.vue"),
+      },
+      { path: "school-list", component: () => import("pages/schoolList.vue") },
+    ],
+  },
+
   {
     path: "/admin",
-    component: () => import("src/layouts/AdminLayout.vue"),
+    component: () => import("layouts/AdminLayout.vue"),
+    meta: {
+      requiresAuth: true,
+      roles: ["super_admin", "admin"],
+    },
     children: [
-      // ড্যাশবোর্ড
-      {
-        path: "dashboard",
-        component: () => import("src/pages/dashBoard/DashBoard.vue"),
-      },
+      { path: "", component: () => import("pages/dashBoard/DashBoard.vue") },
 
-      // একাডেমিক মডিউল
       {
         path: "academic-year",
-        component: () => import("src/pages/academic/AcademicYear.vue"),
+        component: () => import("pages/academic/AcademicYear.vue"),
+      },
+      { path: "class", component: () => import("pages/academic/ClassEs.vue") },
+      {
+        path: "sections",
+        component: () => import("pages/academic/SectionsPage.vue"),
       },
       {
-        path: "asin-teacher",
-        component: () => import("src/pages/academic/AssignTeacher.vue"),
+        path: "subjects",
+        component: () => import("pages/academic/SubjectsPage.vue"),
       },
       {
-        path: "section",
-        component: () => import("src/pages/academic/SectionsPage.vue"),
-      },
-      {
-        path: "subject",
-        component: () => import("src/pages/academic/SubjectsPage.vue"),
-      },
-      {
-        path: "class",
-        component: () => import("src/pages/academic/ClassEs.vue"),
+        path: "assign-teacher",
+        component: () => import("pages/academic/AssignTeacher.vue"),
       },
       {
         path: "class-routine",
-        component: () => import("src/pages/academic/ClassRoutine.vue"),
+        component: () => import("pages/academic/ClassRoutine.vue"),
       },
 
-      // স্টুডেন্ট মডিউল
       {
-        path: "student-list",
-        component: () => import("src/pages/students/StudentList.vue"),
+        path: "attendance/student",
+        component: () => import("pages/attendance/studentAttendance.vue"),
       },
       {
-        path: "student-add",
-        component: () => import("src/pages/students/StudentAdd.vue"),
+        path: "attendance/teacher",
+        component: () => import("pages/attendance/TeacherAttendance.vue"),
       },
       {
-        path: "student-create",
-        component: () => import("src/pages/students/StudentCreate.vue"),
+        path: "attendance/staff",
+        component: () => import("pages/attendance/staffAttendance.vue"),
       },
       {
-        path: "student-details",
-        component: () => import("src/pages/students/StudentDetails.vue"),
-      },
-      {
-        path: "student-promote",
-        component: () => import("src/pages/students/StudentPromote.vue"),
+        path: "attendance/report",
+        component: () => import("pages/attendance/AttendanceReport.vue"),
       },
 
-      // শিক্ষক মডিউল
       {
-        path: "teacher-list",
-        component: () => import("src/pages/teacher/teacherList.vue"),
+        path: "certificates/list",
+        component: () => import("pages/certificates/certificateList.vue"),
       },
       {
-        path: "teacher-add",
-        component: () => import("src/pages/teacher/TeacherAdd.vue"),
-      },
-
-      // উপস্থিতি মডিউল (Attendance)
-      {
-        path: "student-attendance",
-        component: () => import("src/pages/attendance/studentAttendance.vue"),
+        path: "certificates/generate",
+        component: () => import("pages/certificates/GenerateCertificate.vue"),
       },
       {
-        path: "teacher-attendance",
-        component: () => import("src/pages/attendance/TeacherAttendance.vue"),
+        path: "certificates/admit",
+        component: () => import("pages/certificates/AdmitCardGenerator.vue"),
       },
       {
-        path: "staff-attendance",
-        component: () => import("src/pages/attendance/staffAttendance.vue"),
-      },
-      {
-        path: "attendance-report",
-        component: () => import("src/pages/attendance/AttendanceReport.vue"),
+        path: "certificates/idcard",
+        component: () => import("pages/certificates/idcartGenerator.vue"),
       },
 
-      // পরীক্ষা মডিউল (Exam)
       {
-        path: "exam-list",
-        component: () => import("src/pages/exam/examList.vue"),
+        path: "exam/create",
+        component: () => import("pages/exam/examCreat.vue"),
+      },
+      { path: "exam/list", component: () => import("pages/exam/examList.vue") },
+      {
+        path: "exam/routine",
+        component: () => import("pages/exam/examRoutine.vue"),
       },
       {
-        path: "exam-create",
-        component: () => import("src/pages/exam/examCreat.vue"),
+        path: "exam/marks",
+        component: () => import("pages/exam/markEntry.vue"),
       },
       {
-        path: "grade-setup",
-        component: () => import("src/pages/exam/GradeSetup.vue"),
+        path: "exam/result",
+        component: () => import("pages/exam/ResultPublish.vue"),
       },
       {
-        path: "mark-entry",
-        component: () => import("src/pages/exam/markEntry.vue"),
-      },
-      {
-        path: "exam-routine",
-        component: () => import("src/pages/exam/examRoutine.vue"),
-      },
-      {
-        path: "result-publish",
-        component: () => import("src/pages/exam/ResultPublish.vue"),
+        path: "exam/grade",
+        component: () => import("pages/exam/GradeSetup.vue"),
       },
 
-      // ফিন্যান্স এবং ফি (Fees)
+      { path: "fees/type", component: () => import("pages/fees/FeeType.vue") },
       {
-        path: "fee-collection",
-        component: () => import("src/pages/fees/FeeCollection.vue"),
+        path: "fees/collection",
+        component: () => import("pages/fees/FeeCollection.vue"),
       },
       {
-        path: "fee-types",
-        component: () => import("src/pages/fees/FeeType.vue"),
-      },
-      {
-        path: "fee-invoice",
-        component: () => import("src/pages/fees/FeeInvoice.vue"),
+        path: "fees/invoice",
+        component: () => import("pages/fees/FeeInvoice.vue"),
       },
 
-      // পেরোল মডিউল (Payroll)
       {
-        path: "payroll-setup",
-        component: () => import("src/pages/payroll/payrollSetup.vue"),
+        path: "hostel/list",
+        component: () => import("pages/hostel/HostelList.vue"),
       },
       {
-        path: "salary-payment",
-        component: () => import("src/pages/payroll/salaryPayment.vue"),
-      },
-
-      // ইনভেন্টরি মডিউল
-      {
-        path: "product-list",
-        component: () => import("src/pages/inventory/productList.vue"),
-      },
-      {
-        path: "purchase",
-        component: () => import("src/pages/inventory/purcHase.vue"),
-      },
-      {
-        path: "stock-report",
-        component: () => import("src/pages/inventory/StockReport.vue"),
-      },
-      {
-        path: "supplier-list",
-        component: () => import("src/pages/inventory/SupplierList.vue"),
+        path: "hostel/rooms",
+        component: () => import("pages/hostel/RoomManagement.vue"),
       },
 
-      // লাইব্রেরি মডিউল
       {
-        path: "book-list",
-        component: () => import("src/pages/library/bookList.vue"),
+        path: "inventory/products",
+        component: () => import("pages/inventory/productList.vue"),
       },
       {
-        path: "book-issue",
-        component: () => import("src/pages/library/bookIssue.vue"),
+        path: "inventory/suppliers",
+        component: () => import("pages/inventory/SupplierList.vue"),
       },
       {
-        path: "book-return",
-        component: () => import("src/pages/library/bookReturn.vue"),
-      },
-
-      // রিপোর্ট মডিউল
-      {
-        path: "exam-reports",
-        component: () => import("src/pages/reports/ExamReports.vue"),
+        path: "inventory/purchase",
+        component: () => import("pages/inventory/purcHase.vue"),
       },
       {
-        path: "fees-reports",
-        component: () => import("src/pages/reports/FeesReports.vue"),
-      },
-      {
-        path: "payroll-reports",
-        component: () => import("src/pages/reports/payrollReports.vue"),
+        path: "inventory/report",
+        component: () => import("pages/inventory/StockReport.vue"),
       },
 
-      // সার্টিফিকেট এবং নোটিশ
       {
-        path: "notice-list",
-        component: () => import("src/pages/notice/noticeList.vue"),
+        path: "library/books",
+        component: () => import("pages/library/bookList.vue"),
       },
       {
-        path: "generate-certificate",
-        component: () =>
-          import("src/pages/certificates/GenerateCertificate.vue"),
+        path: "library/issue",
+        component: () => import("pages/library/bookIssue.vue"),
       },
       {
-        path: "id-card",
-        component: () => import("src/pages/certificates/idcartGenerator.vue"),
+        path: "library/return",
+        component: () => import("pages/library/bookReturn.vue"),
       },
 
-      // সেটিংস
       {
-        path: "school-profile",
-        component: () => import("src/pages/settings/SchoolProfile.vue"),
+        path: "notice",
+        component: () => import("pages/notice/noticeList.vue"),
+      },
+
+      {
+        path: "payroll/setup",
+        component: () => import("pages/payroll/payrollSetup.vue"),
       },
       {
-        path: "user-management",
-        component: () => import("src/pages/settings/UserManagement.vue"),
+        path: "payroll/salary",
+        component: () => import("pages/payroll/salaryPayment.vue"),
+      },
+
+      {
+        path: "reports/exam",
+        component: () => import("pages/reports/ExamReports.vue"),
+      },
+      {
+        path: "reports/fees",
+        component: () => import("pages/reports/FeesReports.vue"),
+      },
+      {
+        path: "reports/attendance",
+        component: () => import("pages/reports/attendanceReport.vue"),
+      },
+      {
+        path: "reports/payroll",
+        component: () => import("pages/reports/payrollReports.vue"),
+      },
+
+      {
+        path: "students",
+        component: () => import("pages/students/StudentList.vue"),
+      },
+      {
+        path: "students/add",
+        component: () => import("pages/students/StudentAdd.vue"),
+      },
+      {
+        path: "students/create",
+        component: () => import("pages/students/StudentCreate.vue"),
+      },
+      {
+        path: "students/details",
+        component: () => import("pages/students/StudentDetails.vue"),
+      },
+      {
+        path: "students/promote",
+        component: () => import("pages/students/StudentPromote.vue"),
+      },
+
+      {
+        path: "teachers",
+        component: () => import("pages/teacher/teacherList.vue"),
+      },
+      {
+        path: "teachers/add",
+        component: () => import("pages/teacher/TeacherAdd.vue"),
+      },
+
+      {
+        path: "settings/school",
+        component: () => import("pages/settings/SchoolProfile.vue"),
+      },
+      {
+        path: "settings/users",
+        component: () => import("pages/settings/UserManagement.vue"),
       },
     ],
   },
 
-  // ৪0৪ এরর পেজ (এটি সবার শেষে থাকতে হবে)
   {
     path: "/:catchAll(.*)*",
     component: () => import("pages/ErrorNotFound.vue"),
